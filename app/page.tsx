@@ -53,17 +53,41 @@ export default function Home() {
         // On garde "inconnue" si la récupération de l'IP échoue
       }
 
+      const payload = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        message: formData.message,
+        time,
+        user_ip: userIp,
+      };
+
+      // Envoi au bot Telegram via la route API
+      try {
+        const res = await fetch("/api/contact", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          console.error(
+            "Erreur lors de l'envoi vers /api/contact :",
+            res.status,
+          );
+        }
+      } catch (err) {
+        console.error("Erreur réseau vers /api/contact :", err);
+      }
+
       await emailjs.send(
         EMAILJS_SERVICE_ID,
         EMAILJS_TEMPLATE_ID,
         {
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          subject: formData.message,
+          ...payload,
           to_email: "16paysayocesar@gmail.com",
-          time,
-          ip: userIp,
         },
         EMAILJS_PUBLIC_KEY,
       );
